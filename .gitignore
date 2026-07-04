@@ -1,0 +1,6 @@
+.agents/
+MundialLigaAssets/
+node_modules/
+dist/
+.DS_Store
+Thumbs.db
