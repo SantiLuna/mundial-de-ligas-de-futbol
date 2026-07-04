@@ -398,6 +398,23 @@ input {
   line-height: 1.4;
 }
 
+.public-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px clamp(22px, 5vw, 72px);
+  border-bottom: 1px solid #d9c58f;
+  background: #fff8df;
+  color: #4e3a08;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.public-notice strong {
+  flex: 0 0 auto;
+  color: #2e2204;
+}
+
 .layout {
   display: grid;
   grid-template-columns: 286px minmax(620px, 1fr) 352px;
@@ -2018,6 +2035,13 @@ tbody tr.third {
 
   .journey-guide {
     padding: 26px 18px;
+  }
+
+  .public-notice {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 18px;
   }
 
   .layout,

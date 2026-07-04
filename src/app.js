@@ -13,7 +13,7 @@ import {
   simulateMatches,
   updateKnockoutScore,
   updateMatchScore
-} from "./tournament.js?v=20260703-knockout-sim2";
+} from "./tournament.js?v=20260704-public-ready";
 import { buildSquad } from "./squads.js";
 
 const storageKey = "mundial-ligas-state-v2";
@@ -52,6 +52,7 @@ function render() {
 
     ${renderLandingHero(landingGroup, playedMatches, qualified.all.length)}
     ${renderJourneyGuide()}
+    ${renderPublicNotice()}
 
     <main class="layout">
       <aside class="sidebar">
@@ -193,6 +194,7 @@ function render() {
     <footer class="statusbar">
       <span>Simulacion: <strong>${playedMatches === state.matches.length ? "Completa" : "Activa"}</strong></span>
       <span>Ultima simulacion: ${state.lastSimulationAt ?? "sin ejecutar"}</span>
+      <span>Prototipo no oficial</span>
       <button class="link-button" data-action="reset-all">Reiniciar todo</button>
     </footer>
 
@@ -304,6 +306,15 @@ function journeyStepTarget(number) {
     5: "#ligas"
   };
   return targets[number] ?? "#inicio";
+}
+
+function renderPublicNotice() {
+  return `
+    <section class="public-notice" aria-label="Aviso de proyecto no oficial">
+      <strong>Prototipo no oficial.</strong>
+      <span>No afiliado ni aprobado por organizaciones, ligas, clubes o jugadores. Logos, nombres y marcas pertenecen a sus titulares; resultados y plantillas son datos de simulacion.</span>
+    </section>
+  `;
 }
 
 function renderStandingRow(row) {
