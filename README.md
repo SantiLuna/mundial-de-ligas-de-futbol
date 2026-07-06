@@ -17,6 +17,12 @@ Los nombres, logos, escudos, banderas y referencias deportivas se usan como iden
 - Simulacion de eliminatorias.
 - Plantillas por liga con titulares, suplentes y banderas por nacionalidad.
 
+## Demo publicada
+
+Abrir la aplicacion web:
+
+https://santiluna.github.io/mundial-de-ligas-de-futbol/
+
 ## Como ejecutarlo
 
 No requiere build ni dependencias.
