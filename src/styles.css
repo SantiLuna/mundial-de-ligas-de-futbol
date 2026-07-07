@@ -1859,7 +1859,7 @@ tbody tr.third {
 
 .player-row {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) 44px 34px;
+  grid-template-columns: 34px minmax(0, 1fr) 44px 34px 18px;
   align-items: center;
   gap: 10px;
   min-height: 48px;
@@ -1965,6 +1965,25 @@ tbody tr.third {
 .player-row b {
   color: var(--green);
   text-align: right;
+}
+
+.drag-handle {
+  display: block;
+  width: 14px;
+  height: 22px;
+  border-radius: 6px;
+  opacity: 0.48;
+  background-image: radial-gradient(currentColor 1.4px, transparent 1.6px);
+  background-position: 0 0;
+  background-size: 7px 7px;
+  color: var(--muted);
+}
+
+.player-row:hover .drag-handle,
+.player-row:focus-visible .drag-handle,
+.player-row.dragging .drag-handle,
+.player-row.drop-target .drag-handle {
+  opacity: 0.86;
 }
 
 .statusbar {
