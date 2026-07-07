@@ -13,7 +13,7 @@ import {
   simulateMatches,
   updateKnockoutScore,
   updateMatchScore
-} from "./tournament.js?v=20260707-lineup-ux";
+} from "./tournament.js?v=20260707-lineup-dnd";
 import { buildSquad } from "./squads.js";
 
 const storageKey = "mundial-ligas-state-v2";
@@ -31,6 +31,9 @@ let customLineups = loadCustomLineups();
 let logoAssetMap = new Map();
 let selectedLeagueId = null;
 let selectedLineupPick = null;
+let draggedLineupPick = null;
+let pointerLineupDrag = null;
+let suppressLineupClick = false;
 
 function render() {
   const standings = calculateStandings(state.matches);
@@ -661,7 +664,7 @@ function renderSquadPanel(league, squad) {
             </label>
             <button class="button secondary" data-action="reset-lineup" data-league-id="${league.id}" ${squad.hasCustomLineup ? "" : "disabled"}>Restaurar</button>
           </div>
-          <p>${selectedPlayer ? `Seleccionado: ${selectedPlayer.name}. Elegi otro jugador para intercambiar.` : "Selecciona dos jugadores para intercambiar titular, suplente o posicion."}</p>
+          <p>${selectedPlayer ? `Seleccionado: ${selectedPlayer.name}. Elegi otro jugador para intercambiar.` : "Arrastra un jugador sobre otro o selecciona dos para intercambiar titular, suplente o posicion."}</p>
         </section>
 
         <section class="formation-board" aria-label="Formacion titular ${squad.formation}">
@@ -710,7 +713,7 @@ function renderFormationLine(league, label, players) {
       ${players
         .map(
           (player) => `
-            <button class="pitch-player ${isSelectedLineupPlayer(league.id, player.id) ? "selected" : ""}" data-action="select-lineup-player" data-league-id="${league.id}" data-player-id="${player.id}" type="button">
+            <button class="pitch-player ${lineupPlayerClasses(league.id, player.id)}" data-action="select-lineup-player" data-league-id="${league.id}" data-player-id="${player.id}" type="button">
               <strong>${player.shirtNumber}</strong>
               <span>${player.position} ${playerNationalityBadge(player)}</span>
               <em>${shortName(player.name)}</em>
@@ -724,7 +727,7 @@ function renderFormationLine(league, label, players) {
 
 function renderPlayerRow(league, player, isCaptain, squadRole) {
   return `
-    <button class="player-row ${isSelectedLineupPlayer(league.id, player.id) ? "selected" : ""}" data-action="select-lineup-player" data-league-id="${league.id}" data-player-id="${player.id}" type="button">
+    <button class="player-row ${lineupPlayerClasses(league.id, player.id)}" data-action="select-lineup-player" data-league-id="${league.id}" data-player-id="${player.id}" type="button">
       <span class="shirt-number">${player.shirtNumber}</span>
       <div>
         <strong>${playerNationalityBadge(player)} ${player.name}${isCaptain ? " (C)" : ""}</strong>
@@ -734,6 +737,15 @@ function renderPlayerRow(league, player, isCaptain, squadRole) {
       <b>${player.rating}</b>
     </button>
   `;
+}
+
+function lineupPlayerClasses(leagueId, playerId) {
+  return [
+    isSelectedLineupPlayer(leagueId, playerId) ? "selected" : "",
+    draggedLineupPick?.leagueId === leagueId && draggedLineupPick.playerId === playerId ? "dragging" : ""
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function isSelectedLineupPlayer(leagueId, playerId) {
@@ -1057,6 +1069,8 @@ function handleLineupPlayerSelection(leagueId, playerId) {
 }
 
 function swapLineupPlayers(leagueId, firstPlayerId, secondPlayerId) {
+  if (!leagueId || !firstPlayerId || !secondPlayerId || firstPlayerId === secondPlayerId) return;
+
   updateLineupConfig(leagueId, (config) => {
     const firstLocation = findLineupPlayer(config, firstPlayerId);
     const secondLocation = findLineupPlayer(config, secondPlayerId);
@@ -1081,6 +1095,33 @@ function renderSquadUpdate({ preserveScroll = false } = {}) {
   if (preserveScroll) {
     const nextPanel = document.querySelector(".squad-panel");
     if (nextPanel) nextPanel.scrollTop = scrollTop;
+  }
+}
+
+function getLineupDragTarget(event) {
+  return event.target.closest("[data-action='select-lineup-player']");
+}
+
+function getLineupDropTargetFromPoint(clientX, clientY) {
+  return document.elementFromPoint(clientX, clientY)?.closest("[data-action='select-lineup-player']");
+}
+
+function clearLineupDropTargets() {
+  document.querySelectorAll(".drop-target").forEach((element) => element.classList.remove("drop-target"));
+}
+
+function autoScrollSquadPanel(clientY) {
+  const panel = document.querySelector(".squad-panel");
+  if (!panel) return;
+
+  const bounds = panel.getBoundingClientRect();
+  const edgeSize = 86;
+  const maxStep = 22;
+  if (clientY < bounds.top + edgeSize) {
+    panel.scrollTop -= Math.ceil(((bounds.top + edgeSize - clientY) / edgeSize) * maxStep);
+  }
+  if (clientY > bounds.bottom - edgeSize) {
+    panel.scrollTop += Math.ceil(((clientY - (bounds.bottom - edgeSize)) / edgeSize) * maxStep);
   }
 }
 
@@ -1177,6 +1218,10 @@ app.addEventListener("click", (event) => {
   }
 
   if (action === "select-lineup-player") {
+    if (suppressLineupClick) {
+      suppressLineupClick = false;
+      return;
+    }
     handleLineupPlayerSelection(target.dataset.leagueId, target.dataset.playerId);
   }
 
@@ -1284,6 +1329,125 @@ app.addEventListener("change", (event) => {
     ...config,
     formation: formationLayouts[target.value] ? target.value : config.formation
   }));
+});
+
+app.addEventListener("pointerdown", (event) => {
+  const target = getLineupDragTarget(event);
+  if (!target || event.button > 0) return;
+
+  pointerLineupDrag = {
+    target,
+    leagueId: target.dataset.leagueId,
+    playerId: target.dataset.playerId,
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    active: false
+  };
+});
+
+app.addEventListener("pointermove", (event) => {
+  if (!pointerLineupDrag || pointerLineupDrag.pointerId !== event.pointerId) return;
+
+  const distanceX = Math.abs(event.clientX - pointerLineupDrag.startX);
+  const distanceY = Math.abs(event.clientY - pointerLineupDrag.startY);
+  if (!pointerLineupDrag.active && Math.max(distanceX, distanceY) < 8) return;
+
+  event.preventDefault();
+  if (!pointerLineupDrag.active) {
+    pointerLineupDrag.active = true;
+    draggedLineupPick = {
+      leagueId: pointerLineupDrag.leagueId,
+      playerId: pointerLineupDrag.playerId
+    };
+    selectedLineupPick = null;
+    pointerLineupDrag.target.classList.add("dragging");
+    pointerLineupDrag.target.setPointerCapture?.(event.pointerId);
+  }
+
+  autoScrollSquadPanel(event.clientY);
+  clearLineupDropTargets();
+  const dropTarget = getLineupDropTargetFromPoint(event.clientX, event.clientY);
+  if (dropTarget && dropTarget.dataset.leagueId === pointerLineupDrag.leagueId) {
+    dropTarget.classList.add("drop-target");
+  }
+});
+
+app.addEventListener("pointerup", (event) => {
+  if (!pointerLineupDrag || pointerLineupDrag.pointerId !== event.pointerId) return;
+
+  const drag = pointerLineupDrag;
+  pointerLineupDrag = null;
+  clearLineupDropTargets();
+  drag.target.classList.remove("dragging");
+  drag.target.releasePointerCapture?.(event.pointerId);
+
+  if (!drag.active) return;
+
+  suppressLineupClick = true;
+  window.setTimeout(() => {
+    suppressLineupClick = false;
+  }, 0);
+  const dropTarget = getLineupDropTargetFromPoint(event.clientX, event.clientY);
+  draggedLineupPick = null;
+  if (dropTarget && dropTarget.dataset.leagueId === drag.leagueId) {
+    swapLineupPlayers(drag.leagueId, drag.playerId, dropTarget.dataset.playerId);
+  }
+});
+
+app.addEventListener("pointercancel", () => {
+  pointerLineupDrag = null;
+  draggedLineupPick = null;
+  clearLineupDropTargets();
+  document.querySelectorAll(".dragging").forEach((element) => element.classList.remove("dragging"));
+});
+
+app.addEventListener("dragstart", (event) => {
+  const target = getLineupDragTarget(event);
+  if (!target) return;
+
+  draggedLineupPick = {
+    leagueId: target.dataset.leagueId,
+    playerId: target.dataset.playerId
+  };
+  selectedLineupPick = null;
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", JSON.stringify(draggedLineupPick));
+  target.classList.add("dragging");
+});
+
+app.addEventListener("dragover", (event) => {
+  const target = getLineupDragTarget(event);
+  if (!target || !draggedLineupPick || target.dataset.leagueId !== draggedLineupPick.leagueId) return;
+
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
+  target.classList.add("drop-target");
+});
+
+app.addEventListener("dragleave", (event) => {
+  const target = getLineupDragTarget(event);
+  if (!target) return;
+  target.classList.remove("drop-target");
+});
+
+app.addEventListener("drop", (event) => {
+  const target = getLineupDragTarget(event);
+  if (!target || !draggedLineupPick || target.dataset.leagueId !== draggedLineupPick.leagueId) return;
+
+  event.preventDefault();
+  target.classList.remove("drop-target");
+  const draggedPlayerId = draggedLineupPick.playerId;
+  const droppedPlayerId = target.dataset.playerId;
+  draggedLineupPick = null;
+  swapLineupPlayers(target.dataset.leagueId, draggedPlayerId, droppedPlayerId);
+});
+
+app.addEventListener("dragend", () => {
+  draggedLineupPick = null;
+  document.querySelectorAll(".dragging, .drop-target").forEach((element) => {
+    element.classList.remove("dragging", "drop-target");
+  });
 });
 
 render();

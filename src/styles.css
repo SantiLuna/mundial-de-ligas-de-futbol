@@ -1773,9 +1773,10 @@ tbody tr.third {
   border-radius: var(--radius);
   background: transparent;
   color: #fff;
-  cursor: pointer;
+  cursor: grab;
   font: inherit;
   text-align: center;
+  touch-action: pan-y;
 }
 
 .pitch-player:hover,
@@ -1783,6 +1784,18 @@ tbody tr.third {
 .pitch-player.selected {
   border-color: rgba(255, 255, 255, 0.78);
   background: rgba(255, 255, 255, 0.14);
+}
+
+.pitch-player.dragging,
+.player-row.dragging {
+  cursor: grabbing;
+  opacity: 0.5;
+}
+
+.pitch-player.drop-target {
+  border-color: #fff8d9;
+  background: rgba(255, 248, 217, 0.22);
+  box-shadow: 0 0 0 2px rgba(255, 248, 217, 0.35);
 }
 
 .pitch-player strong {
@@ -1855,9 +1868,10 @@ tbody tr.third {
   border-bottom: 1px solid var(--line);
   background: #fff;
   color: inherit;
-  cursor: pointer;
+  cursor: grab;
   font: inherit;
   text-align: left;
+  touch-action: pan-y;
 }
 
 .player-row:last-child {
@@ -1873,6 +1887,11 @@ tbody tr.third {
 
 .player-row.selected {
   box-shadow: inset 4px 0 0 var(--green);
+}
+
+.player-row.drop-target {
+  background: #fff8df;
+  box-shadow: inset 4px 0 0 var(--amber);
 }
 
 .shirt-number {
