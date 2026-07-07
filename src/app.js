@@ -13,7 +13,7 @@ import {
   simulateMatches,
   updateKnockoutScore,
   updateMatchScore
-} from "./tournament.js?v=20260707-lineup-dnd";
+} from "./tournament.js?v=20260707-lineup-list-dnd";
 import { buildSquad } from "./squads.js";
 
 const storageKey = "mundial-ligas-state-v2";
@@ -735,6 +735,7 @@ function renderPlayerRow(league, player, isCaptain, squadRole) {
       </div>
       <em>${player.position}</em>
       <b>${player.rating}</b>
+      <span class="drag-handle" aria-hidden="true"></span>
     </button>
   `;
 }
