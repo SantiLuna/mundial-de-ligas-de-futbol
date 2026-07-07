@@ -13,14 +13,24 @@ import {
   simulateMatches,
   updateKnockoutScore,
   updateMatchScore
-} from "./tournament.js?v=20260704-public-ready";
+} from "./tournament.js?v=20260707-lineup-editor";
 import { buildSquad } from "./squads.js";
 
 const storageKey = "mundial-ligas-state-v2";
+const lineupStorageKey = "mundial-ligas-custom-lineups-v1";
+const formationLayouts = {
+  "4-3-3": [4, 3, 3],
+  "4-2-3-1": [4, 5, 1],
+  "3-5-2": [3, 5, 2],
+  "4-4-2": [4, 4, 2],
+  "3-4-3": [3, 4, 3]
+};
 const app = document.querySelector("#app");
 let state = loadState();
+let customLineups = loadCustomLineups();
 let logoAssetMap = new Map();
 let selectedLeagueId = null;
+let selectedLineupPick = null;
 
 function render() {
   const standings = calculateStandings(state.matches);
@@ -31,7 +41,7 @@ function render() {
   const knockoutRounds = buildKnockoutRounds(bracket, state.knockoutResults);
   const playedMatches = state.matches.filter(isMatchPlayed).length;
   const selectedLeague = leagues.find((league) => league.id === selectedLeagueId);
-  const selectedSquad = selectedLeague ? buildSquad(selectedLeague) : null;
+  const selectedSquad = selectedLeague ? applyCustomLineup(selectedLeague, buildSquad(selectedLeague)) : null;
 
   app.innerHTML = `
     <header class="topbar">
@@ -616,6 +626,9 @@ function renderSeed(team) {
 }
 
 function renderSquadPanel(league, squad) {
+  const selectedPlayer = selectedLineupPick?.leagueId === league.id
+    ? [...squad.starters, ...squad.substitutes].find((player) => player.id === selectedLineupPick.playerId)
+    : null;
   return `
     <div class="squad-overlay">
       <button class="squad-backdrop" data-action="close-squad" aria-label="Cerrar plantilla"></button>
@@ -638,11 +651,19 @@ function renderSquadPanel(league, squad) {
 
         <p class="squad-note">${squad.sourceNote}</p>
 
+        <section class="lineup-editor" aria-label="Editor de formacion">
+          <label>
+            <span>Esquema</span>
+            <select data-action="change-formation" data-league-id="${league.id}">
+              ${renderFormationOptions(squad.formation)}
+            </select>
+          </label>
+          <button class="button secondary" data-action="reset-lineup" data-league-id="${league.id}" ${squad.hasCustomLineup ? "" : "disabled"}>Restaurar original</button>
+          <p>${selectedPlayer ? `Seleccionado: ${selectedPlayer.name}. Elegi otro jugador para intercambiar.` : "Selecciona dos jugadores para intercambiar titular, suplente o posicion."}</p>
+        </section>
+
         <section class="formation-board" aria-label="Formacion titular ${squad.formation}">
-          ${renderFormationLine("Ataque", squad.starters.slice(8, 11))}
-          ${renderFormationLine("Medio", squad.starters.slice(5, 8))}
-          ${renderFormationLine("Defensa", squad.starters.slice(1, 5))}
-          ${renderFormationLine("Arquero", squad.starters.slice(0, 1))}
+          ${renderFormationBoard(league, squad)}
         </section>
 
         <section class="squad-section">
@@ -651,7 +672,7 @@ function renderSquadPanel(league, squad) {
             <span>${squad.formation}</span>
           </div>
           <div class="player-list starters">
-            ${squad.starters.map((player) => renderPlayerRow(player, player.id === squad.captainId)).join("")}
+            ${squad.starters.map((player) => renderPlayerRow(league, player, player.id === squad.captainId, "Titular")).join("")}
           </div>
         </section>
 
@@ -661,7 +682,7 @@ function renderSquadPanel(league, squad) {
             <span>${squad.substitutes.length} jugadores</span>
           </div>
           <div class="player-list bench">
-            ${squad.substitutes.map((player) => renderPlayerRow(player, false)).join("")}
+            ${squad.substitutes.map((player) => renderPlayerRow(league, player, false, "Suplente")).join("")}
           </div>
         </section>
       </aside>
@@ -669,17 +690,29 @@ function renderSquadPanel(league, squad) {
   `;
 }
 
-function renderFormationLine(label, players) {
+function renderFormationOptions(selectedFormation) {
+  return Object.keys(formationLayouts)
+    .map((formation) => `<option value="${formation}" ${formation === selectedFormation ? "selected" : ""}>${formation}</option>`)
+    .join("");
+}
+
+function renderFormationBoard(league, squad) {
+  return getFormationLines(squad.starters, squad.formation)
+    .map(([label, players]) => renderFormationLine(league, label, players))
+    .join("");
+}
+
+function renderFormationLine(league, label, players) {
   return `
     <div class="formation-line" aria-label="${label}">
       ${players
         .map(
           (player) => `
-            <div class="pitch-player">
+            <button class="pitch-player ${isSelectedLineupPlayer(league.id, player.id) ? "selected" : ""}" data-action="select-lineup-player" data-league-id="${league.id}" data-player-id="${player.id}" type="button">
               <strong>${player.shirtNumber}</strong>
               <span>${player.position} ${playerNationalityBadge(player)}</span>
               <em>${shortName(player.name)}</em>
-            </div>
+            </button>
           `
         )
         .join("")}
@@ -687,18 +720,22 @@ function renderFormationLine(label, players) {
   `;
 }
 
-function renderPlayerRow(player, isCaptain) {
+function renderPlayerRow(league, player, isCaptain, squadRole) {
   return `
-    <div class="player-row">
+    <button class="player-row ${isSelectedLineupPlayer(league.id, player.id) ? "selected" : ""}" data-action="select-lineup-player" data-league-id="${league.id}" data-player-id="${player.id}" type="button">
       <span class="shirt-number">${player.shirtNumber}</span>
       <div>
         <strong>${playerNationalityBadge(player)} ${player.name}${isCaptain ? " (C)" : ""}</strong>
-        <span>${player.role} · ${player.club}</span>
+        <span>${squadRole} · ${player.role} · ${player.club}</span>
       </div>
       <em>${player.position}</em>
       <b>${player.rating}</b>
-    </div>
+    </button>
   `;
+}
+
+function isSelectedLineupPlayer(leagueId, playerId) {
+  return selectedLineupPick?.leagueId === leagueId && selectedLineupPick.playerId === playerId;
 }
 
 function playerNationalityBadge(player) {
@@ -893,6 +930,20 @@ function loadState() {
   return createInitialState();
 }
 
+function loadCustomLineups() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(lineupStorageKey));
+    return stored && typeof stored === "object" ? stored : {};
+  } catch {
+    localStorage.removeItem(lineupStorageKey);
+    return {};
+  }
+}
+
+function persistCustomLineups() {
+  localStorage.setItem(lineupStorageKey, JSON.stringify(customLineups));
+}
+
 function persist() {
   localStorage.setItem(storageKey, JSON.stringify(state));
 }
@@ -901,6 +952,146 @@ function updateState(nextState) {
   state = nextState;
   persist();
   render();
+}
+
+function applyCustomLineup(league, squad) {
+  const customLineup = customLineups[league.id];
+  if (!customLineup) return { ...squad, hasCustomLineup: false };
+
+  const allPlayers = [...squad.starters, ...squad.substitutes];
+  const playersById = new Map(allPlayers.map((player) => [player.id, player]));
+  const starterIds = normalizeLineupIds(customLineup.starters, squad.starters.map((player) => player.id), playersById, 11);
+  const starterIdSet = new Set(starterIds);
+  const preferredSubstituteIds = Array.isArray(customLineup.substitutes) ? customLineup.substitutes : [];
+  const substituteIds = [
+    ...preferredSubstituteIds.filter((playerId) => playersById.has(playerId) && !starterIdSet.has(playerId)),
+    ...allPlayers.map((player) => player.id).filter((playerId) => !starterIdSet.has(playerId) && !preferredSubstituteIds.includes(playerId))
+  ];
+  const formation = formationLayouts[customLineup.formation] ? customLineup.formation : squad.formation;
+
+  return {
+    ...squad,
+    formation,
+    starters: starterIds.map((playerId) => playersById.get(playerId)),
+    substitutes: substituteIds.map((playerId) => playersById.get(playerId)),
+    hasCustomLineup: true
+  };
+}
+
+function normalizeLineupIds(candidateIds, fallbackIds, playersById, expectedCount) {
+  const validIds = [];
+  const seenIds = new Set();
+  const sourceIds = Array.isArray(candidateIds) && candidateIds.length ? candidateIds : fallbackIds;
+
+  for (const playerId of sourceIds) {
+    if (playersById.has(playerId) && !seenIds.has(playerId)) {
+      validIds.push(playerId);
+      seenIds.add(playerId);
+    }
+  }
+
+  for (const playerId of fallbackIds) {
+    if (validIds.length >= expectedCount) break;
+    if (playersById.has(playerId) && !seenIds.has(playerId)) {
+      validIds.push(playerId);
+      seenIds.add(playerId);
+    }
+  }
+
+  return validIds.slice(0, expectedCount);
+}
+
+function getLineupConfig(leagueId) {
+  const league = leagues.find((item) => item.id === leagueId);
+  if (!league) return null;
+
+  const squad = applyCustomLineup(league, buildSquad(league));
+  return {
+    formation: squad.formation,
+    starters: squad.starters.map((player) => player.id),
+    substitutes: squad.substitutes.map((player) => player.id)
+  };
+}
+
+function updateLineupConfig(leagueId, updater) {
+  const currentConfig = getLineupConfig(leagueId);
+  if (!currentConfig) return;
+
+  const nextConfig = updater({
+    formation: currentConfig.formation,
+    starters: [...currentConfig.starters],
+    substitutes: [...currentConfig.substitutes]
+  });
+
+  customLineups = {
+    ...customLineups,
+    [leagueId]: nextConfig
+  };
+  persistCustomLineups();
+  render();
+}
+
+function resetLineupConfig(leagueId) {
+  const { [leagueId]: _removed, ...rest } = customLineups;
+  customLineups = rest;
+  selectedLineupPick = selectedLineupPick?.leagueId === leagueId ? null : selectedLineupPick;
+  persistCustomLineups();
+  render();
+}
+
+function handleLineupPlayerSelection(leagueId, playerId) {
+  if (selectedLineupPick?.leagueId === leagueId && selectedLineupPick.playerId !== playerId) {
+    const firstPlayerId = selectedLineupPick.playerId;
+    selectedLineupPick = null;
+    swapLineupPlayers(leagueId, firstPlayerId, playerId);
+    return;
+  }
+
+  selectedLineupPick =
+    selectedLineupPick?.leagueId === leagueId && selectedLineupPick.playerId === playerId
+      ? null
+      : { leagueId, playerId };
+  render();
+}
+
+function swapLineupPlayers(leagueId, firstPlayerId, secondPlayerId) {
+  updateLineupConfig(leagueId, (config) => {
+    const firstLocation = findLineupPlayer(config, firstPlayerId);
+    const secondLocation = findLineupPlayer(config, secondPlayerId);
+    if (!firstLocation || !secondLocation) return config;
+
+    const firstList = config[firstLocation.listName];
+    const secondList = config[secondLocation.listName];
+    [firstList[firstLocation.index], secondList[secondLocation.index]] = [
+      secondList[secondLocation.index],
+      firstList[firstLocation.index]
+    ];
+
+    return config;
+  });
+}
+
+function findLineupPlayer(config, playerId) {
+  for (const listName of ["starters", "substitutes"]) {
+    const index = config[listName].indexOf(playerId);
+    if (index >= 0) return { listName, index };
+  }
+  return null;
+}
+
+function getFormationLines(starters, formation) {
+  const [defenderCount, midfielderCount, forwardCount] = formationLayouts[formation] ?? formationLayouts["4-3-3"];
+  const goalkeeper = starters.slice(0, 1);
+  const defenders = starters.slice(1, 1 + defenderCount);
+  const midfielders = starters.slice(1 + defenderCount, 1 + defenderCount + midfielderCount);
+  const forwards = starters.slice(1 + defenderCount + midfielderCount, 1 + defenderCount + midfielderCount + forwardCount);
+
+  return [
+    ["Ataque", forwards],
+    ["Medio", midfielders],
+    ["Defensa", defenders],
+    ["Arquero", goalkeeper]
+  ];
 }
 
 function getKnockoutRoundsForResults(results = state.knockoutResults) {
@@ -968,7 +1159,16 @@ app.addEventListener("click", (event) => {
 
   if (action === "close-squad") {
     selectedLeagueId = null;
+    selectedLineupPick = null;
     render();
+  }
+
+  if (action === "select-lineup-player") {
+    handleLineupPlayerSelection(target.dataset.leagueId, target.dataset.playerId);
+  }
+
+  if (action === "reset-lineup") {
+    resetLineupConfig(target.dataset.leagueId);
   }
 
   if (action === "simulate-group") {
@@ -1061,6 +1261,16 @@ app.addEventListener("input", (event) => {
     matches: updateMatchScore(state.matches, target.dataset.matchId, target.dataset.side, target.value),
     knockoutResults: {}
   });
+});
+
+app.addEventListener("change", (event) => {
+  const target = event.target;
+  if (target.dataset.action !== "change-formation") return;
+
+  updateLineupConfig(target.dataset.leagueId, (config) => ({
+    ...config,
+    formation: formationLayouts[target.value] ? target.value : config.formation
+  }));
 });
 
 render();

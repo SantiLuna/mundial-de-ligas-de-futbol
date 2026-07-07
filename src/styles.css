@@ -1694,6 +1694,46 @@ tbody tr.third {
   line-height: 1.35;
 }
 
+.lineup-editor {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fbfdfb;
+}
+
+.lineup-editor label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.lineup-editor select {
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+}
+
+.lineup-editor .button {
+  width: 100%;
+}
+
+.lineup-editor p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .formation-board {
   display: grid;
   gap: 12px;
@@ -1719,8 +1759,20 @@ tbody tr.third {
   min-width: 68px;
   justify-items: center;
   gap: 3px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
   color: #fff;
+  cursor: pointer;
+  font: inherit;
   text-align: center;
+}
+
+.pitch-player:hover,
+.pitch-player:focus-visible,
+.pitch-player.selected {
+  border-color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .pitch-player strong {
@@ -1789,11 +1841,28 @@ tbody tr.third {
   gap: 10px;
   min-height: 48px;
   padding: 8px 10px;
+  border: 0;
   border-bottom: 1px solid var(--line);
+  background: #fff;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
 }
 
 .player-row:last-child {
   border-bottom: 0;
+}
+
+.player-row:hover,
+.player-row:focus-visible,
+.player-row.selected {
+  background: var(--surface-soft);
+  outline: 0;
+}
+
+.player-row.selected {
+  box-shadow: inset 4px 0 0 var(--green);
 }
 
 .shirt-number {
