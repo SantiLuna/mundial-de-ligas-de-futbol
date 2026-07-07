@@ -1696,15 +1696,23 @@ tbody tr.third {
 
 .lineup-editor {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: #fbfdfb;
 }
 
-.lineup-editor label {
+.lineup-controls {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.lineup-editor label {
+  display: flex;
+  align-items: center;
   gap: 6px;
   color: var(--muted);
   font-size: 12px;
@@ -1714,6 +1722,7 @@ tbody tr.third {
 
 .lineup-editor select {
   min-height: 38px;
+  min-width: 128px;
   padding: 8px 10px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
@@ -1724,7 +1733,8 @@ tbody tr.third {
 }
 
 .lineup-editor .button {
-  width: 100%;
+  min-height: 38px;
+  white-space: nowrap;
 }
 
 .lineup-editor p {
@@ -2237,5 +2247,9 @@ tbody tr.third {
 
   .pitch-player {
     min-width: 56px;
+  }
+
+  .lineup-controls {
+    grid-template-columns: 1fr auto;
   }
 }

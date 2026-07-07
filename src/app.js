@@ -13,7 +13,7 @@ import {
   simulateMatches,
   updateKnockoutScore,
   updateMatchScore
-} from "./tournament.js?v=20260707-lineup-editor";
+} from "./tournament.js?v=20260707-lineup-ux";
 import { buildSquad } from "./squads.js";
 
 const storageKey = "mundial-ligas-state-v2";
@@ -652,13 +652,15 @@ function renderSquadPanel(league, squad) {
         <p class="squad-note">${squad.sourceNote}</p>
 
         <section class="lineup-editor" aria-label="Editor de formacion">
-          <label>
-            <span>Esquema</span>
-            <select data-action="change-formation" data-league-id="${league.id}">
-              ${renderFormationOptions(squad.formation)}
-            </select>
-          </label>
-          <button class="button secondary" data-action="reset-lineup" data-league-id="${league.id}" ${squad.hasCustomLineup ? "" : "disabled"}>Restaurar original</button>
+          <div class="lineup-controls">
+            <label>
+              <span>Esquema</span>
+              <select data-action="change-formation" data-league-id="${league.id}">
+                ${renderFormationOptions(squad.formation)}
+              </select>
+            </label>
+            <button class="button secondary" data-action="reset-lineup" data-league-id="${league.id}" ${squad.hasCustomLineup ? "" : "disabled"}>Restaurar</button>
+          </div>
           <p>${selectedPlayer ? `Seleccionado: ${selectedPlayer.name}. Elegi otro jugador para intercambiar.` : "Selecciona dos jugadores para intercambiar titular, suplente o posicion."}</p>
         </section>
 
@@ -1013,7 +1015,7 @@ function getLineupConfig(leagueId) {
   };
 }
 
-function updateLineupConfig(leagueId, updater) {
+function updateLineupConfig(leagueId, updater, options = {}) {
   const currentConfig = getLineupConfig(leagueId);
   if (!currentConfig) return;
 
@@ -1028,15 +1030,15 @@ function updateLineupConfig(leagueId, updater) {
     [leagueId]: nextConfig
   };
   persistCustomLineups();
-  render();
+  renderSquadUpdate(options);
 }
 
-function resetLineupConfig(leagueId) {
+function resetLineupConfig(leagueId, options = {}) {
   const { [leagueId]: _removed, ...rest } = customLineups;
   customLineups = rest;
   selectedLineupPick = selectedLineupPick?.leagueId === leagueId ? null : selectedLineupPick;
   persistCustomLineups();
-  render();
+  renderSquadUpdate(options);
 }
 
 function handleLineupPlayerSelection(leagueId, playerId) {
@@ -1051,7 +1053,7 @@ function handleLineupPlayerSelection(leagueId, playerId) {
     selectedLineupPick?.leagueId === leagueId && selectedLineupPick.playerId === playerId
       ? null
       : { leagueId, playerId };
-  render();
+  renderSquadUpdate({ preserveScroll: true });
 }
 
 function swapLineupPlayers(leagueId, firstPlayerId, secondPlayerId) {
@@ -1068,7 +1070,18 @@ function swapLineupPlayers(leagueId, firstPlayerId, secondPlayerId) {
     ];
 
     return config;
-  });
+  }, { preserveScroll: true });
+}
+
+function renderSquadUpdate({ preserveScroll = false } = {}) {
+  const panel = document.querySelector(".squad-panel");
+  const scrollTop = preserveScroll ? panel?.scrollTop ?? 0 : null;
+  render();
+
+  if (preserveScroll) {
+    const nextPanel = document.querySelector(".squad-panel");
+    if (nextPanel) nextPanel.scrollTop = scrollTop;
+  }
 }
 
 function findLineupPlayer(config, playerId) {
