@@ -286,113 +286,86 @@ function renderConceptExplainer() {
       <div class="concept-shell">
         <header class="concept-heading">
           <div>
-            <span class="concept-kicker">Primero, la idea</span>
-            <h2 id="concept-title">Una liga se convierte<br />en selección.</h2>
+            <span class="concept-kicker">Entendelo en 20 segundos</span>
+            <h2 id="concept-title">¿Qué es el Mundial de Ligas?</h2>
           </div>
-          <p><strong>Una liga</strong> es el campeonato que reúne a los clubes de un país o región. En este Mundial, esos clubes aportan futbolistas para formar un único plantel que representa al torneo donde juegan.</p>
+          <p><strong>No compiten países. Compiten ligas.</strong> Cada campeonato arma un equipo con jugadores de sus propios clubes.</p>
         </header>
 
-        <div class="concept-definition-grid">
-          <article class="concept-rule-card">
-            <span class="concept-card-number">01 · La regla central</span>
-            <h3>El pasaporte no define el equipo. El contrato sí.</h3>
-            <p>Puede ser convocado cualquier jugador que compita en un club de esa liga al cierre de la lista y mantenga contrato vigente hasta el final del año del Mundial.</p>
-
-            <div class="contract-rule">
-              <span class="contract-date"><strong>31</strong><small>DIC</small></span>
-              <div>
-                <strong>Vínculo vigente</strong>
-                <span>hasta el cierre del año de la edición</span>
-              </div>
-            </div>
-
-            <ul class="eligibility-list">
-              <li><span>✓</span><div><strong>Nacionalidad libre</strong><small>El país de nacimiento no limita la convocatoria.</small></div></li>
-              <li><span>✓</span><div><strong>Equilibrio entre clubes</strong><small>Máximo ${rules.maxPlayersPerClub} jugadores por club y al menos ${rules.minimumDistinctClubs} clubes representados.</small></div></li>
-              <li><span>✓</span><div><strong>Préstamos incluidos</strong><small>El jugador representa a la liga en la que compite durante la edición.</small></div></li>
-            </ul>
-
-            <p class="registration-note">La nómina se cierra ${rules.cutoffDaysBeforeTournament} días antes del torneo para validar contratos, préstamos y elegibilidad.</p>
+        <div class="concept-summary" role="list" aria-label="Tres claves del Mundial de Ligas">
+          <article role="listitem">
+            <span>1</span>
+            <div><strong>El contrato manda</strong><p>Puede jugar quien tenga contrato con un club de esa liga hasta el <b>31 de diciembre</b> del año del Mundial.</p></div>
           </article>
+          <article role="listitem">
+            <span>2</span>
+            <div><strong>El pasaporte no importa</strong><p>La nacionalidad es libre. Importa la liga en la que juega el futbolista.</p></div>
+          </article>
+          <article role="listitem">
+            <span>3</span>
+            <div><strong>Los rivales se unen</strong><p>Jugadores de clubes enfrentados pasan a ser compañeros para representar a su campeonato.</p></div>
+          </article>
+        </div>
 
-          <div class="league-examples" aria-label="Ejemplos de selecciones de liga">
+        <section class="concept-examples" aria-labelledby="examples-title">
+          <div class="concept-section-heading">
+            <span class="concept-card-number">Dos ejemplos</span>
+            <h3 id="examples-title">Así se forma cada equipo</h3>
+            <p>Clubes distintos aportan jugadores. Todos defienden a la misma liga.</p>
+          </div>
+          <div class="league-examples" aria-label="Ejemplos de equipos de liga">
             ${renderLeagueConceptExample(
               premierLeague,
               ["Arsenal", "Liverpool", "Manchester City"],
               ["🏴 Inglaterra", "🇦🇷 Argentina", "🇪🇬 Egipto"],
-              "Ingleses y extranjeros que compiten en clubes de la Premier pueden compartir el mismo vestuario."
+              "Ingleses y extranjeros pueden integrar juntos el equipo de la Premier."
             )}
             ${renderLeagueConceptExample(
               argentinaLeague,
               ["River Plate", "Boca Juniors", "Racing Club"],
               ["🇦🇷 Argentina", "🇨🇴 Colombia", "🇺🇾 Uruguay"],
-              "Argentinos y futbolistas de otras nacionalidades representan juntos al campeonato argentino."
+              "Argentinos y extranjeros pueden representar juntos a la liga argentina."
             )}
           </div>
+        </section>
+
+        <div class="concept-takeaway">
+          <span>La idea clave</span>
+          <strong>Importa dónde juega.<br />No qué pasaporte tiene.</strong>
         </div>
 
-        <article class="rivals-story">
-          <div class="rivals-copy">
-            <span class="concept-card-number">02 · La transformación</span>
-            <h3>Rivales el domingo.<br />Compañeros en el Mundial.</h3>
-            <p>La lógica se parece a una Copa del Mundo: futbolistas que se enfrentan durante toda la temporada dejan atrás la camiseta de su club y construyen una identidad común. La diferencia es que acá no los une el pasaporte; los une la liga.</p>
+        <details class="concept-details">
+          <summary>Ver reglas de convocatoria</summary>
+          <div>
+            <p><strong>Lista:</strong> se cierra ${rules.cutoffDaysBeforeTournament} días antes del torneo.</p>
+            <p><strong>Equilibrio:</strong> máximo ${rules.maxPlayersPerClub} jugadores por club y al menos ${rules.minimumDistinctClubs} clubes representados.</p>
+            <p><strong>Préstamos:</strong> el jugador representa a la liga donde compite durante la edición.</p>
           </div>
-          <div class="rivals-diagram" aria-label="De rivales de clubes a compañeros de liga">
-            <div class="rival-side">
-              <small>Durante la temporada</small>
-              <span>Club A</span>
-              <b>VS</b>
-              <span>Club B</span>
-              <strong>Rivales</strong>
-            </div>
-            <span class="diagram-arrow" aria-hidden="true">→</span>
-            <div class="league-side">
-              <span class="league-side-mark">${footballIcon()}</span>
-              <div><small>En el Mundial</small><strong>Un mismo equipo</strong></div>
-              <em>Compañeros</em>
-            </div>
-          </div>
-        </article>
+        </details>
 
         <div class="concept-value-section">
           <div class="concept-value-heading">
-            <span class="concept-card-number">03 · Lo que está en juego</span>
-            <h3>¿Por qué una liga querría competir?</h3>
-            <p>No es solamente ganar una copa. El torneo crea una razón para invertir, medir el nivel real y mostrar el campeonato ante una audiencia global.</p>
+            <span class="concept-card-number">¿Qué gana una liga?</span>
+            <h3>Competir para crecer</h3>
+            <p>El Mundial ofrece una medida deportiva y un incentivo para clubes y campeonatos.</p>
           </div>
 
           <div class="value-cards">
             <article>
-              <span>${globeIcon()}</span>
-              <strong>Visibilidad global</strong>
-              <p>Jugadores, clubes y ligas emergentes acceden a una vidriera que cruza mercados y continentes.</p>
-            </article>
-            <article>
               <span>${podiumIcon()}</span>
-              <strong>Comparación real</strong>
-              <p>Europa, Sudamérica, África, Asia, Norteamérica y Oceanía se miden con el mismo formato.</p>
+              <strong>Medir su nivel</strong>
+              <p>Europa, Sudamérica, África y el resto compiten con las mismas reglas.</p>
             </article>
             <article>
               <span>${shirtIcon()}</span>
-              <strong>Premio para los clubes</strong>
-              <p>El modelo propone incentivos según jugadores aportados, minutos disputados y avance de la liga.</p>
+              <strong>Premiar a sus clubes</strong>
+              <p>Los clubes reciben incentivos por aportar jugadores y por el avance de su liga.</p>
             </article>
             <article class="value-card-highlight">
               <span>${trophyIcon()}</span>
               <strong>Elevar el campeonato</strong>
-              <p>Contratar y desarrollar talento elegible fortalece indirectamente el nivel, la profundidad y el atractivo de toda la liga.</p>
+              <p>Más visibilidad y mejores jugadores ayudan a fortalecer toda la competición.</p>
             </article>
-          </div>
-        </div>
-
-        <div class="global-comparison">
-          <div>
-            <span class="comparison-kicker">Un ranking, múltiples identidades</span>
-            <strong>¿Qué liga es realmente la más fuerte?</strong>
-          </div>
-          <p>El simulador compara nivel medio, profundidad del plantel, actualidad y diversidad de clubes. No parte de que un continente sea superior: lo pone a prueba en la cancha.</p>
-          <div class="continent-track" aria-label="Regiones comparadas">
-            <span>Europa</span><i>↔</i><span>Sudamérica</span><i>↔</i><span>África</span><i>↔</i><span>Asia</span><i>↔</i><span>Norteamérica</span><i>↔</i><span>Oceanía</span>
           </div>
         </div>
       </div>
@@ -405,7 +378,7 @@ function renderLeagueConceptExample(league, clubs, nationalities, description) {
     <article class="league-example-card">
       <header>
         ${leagueLogo(league)}
-        <div><span>Ejemplo de convocatoria</span><h3>${league.name}</h3></div>
+        <div><span>Equipo de liga</span><h3>${league.name}</h3></div>
         ${leagueFlagBadge(league)}
       </header>
       <div class="club-merge">
@@ -413,7 +386,7 @@ function renderLeagueConceptExample(league, clubs, nationalities, description) {
           ${clubs.map((club) => `<span>${club}</span>`).join("")}
         </div>
         <span class="merge-arrow" aria-hidden="true">→</span>
-        <strong>${leagueLogo(league)}<small>Selección de liga</small></strong>
+        <strong>${leagueLogo(league)}<small>Un solo equipo</small></strong>
       </div>
       <div class="nationality-row">
         ${nationalities.map((nationality) => `<span>${nationality}</span>`).join("")}
