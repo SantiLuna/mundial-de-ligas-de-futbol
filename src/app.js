@@ -48,19 +48,22 @@ function render() {
 
   app.innerHTML = `
     <header class="topbar">
-      <div class="brand">
+      <a class="brand" href="#inicio" aria-label="Ir al inicio de Mundial de Ligas">
         <span class="brand-mark" aria-hidden="true">${footballIcon()}</span>
-        <strong>${tournamentConfig.name}</strong>
-      </div>
+        <span class="brand-copy">
+          <strong>Mundial de Ligas</strong>
+          <small>Global league championship</small>
+        </span>
+      </a>
       <nav class="tabs" aria-label="Secciones">
         <a href="#inicio">Inicio</a>
         <a href="#grupos">Fase de grupos</a>
-        <a href="#simulacion">Simulacion</a>
+        <a href="#simulacion">Simulación</a>
         <a href="#clasificados">Clasificados</a>
         <a href="#bracket">Llaves</a>
         <a href="#ligas">Plantillas</a>
       </nav>
-      <div class="season-select">${tournamentConfig.editionName}</div>
+      <div class="season-select"><span class="live-dot" aria-hidden="true"></span>${tournamentConfig.editionName}</div>
     </header>
 
     ${renderLandingHero(landingGroup, playedMatches, qualified.all.length)}
@@ -105,7 +108,7 @@ function render() {
       <section class="workspace">
         <div class="section-header">
           <div>
-            <p class="section-label">Grupo seleccionado</p>
+            <p class="section-label">Centro de competición · Grupo seleccionado</p>
             <h1>Grupo ${selectedGroup.id}</h1>
           </div>
           <div class="actions">
@@ -122,7 +125,7 @@ function render() {
                 <tr>
                   <th>#</th>
                   <th>Liga</th>
-                  <th>Region</th>
+                  <th>Región</th>
                   <th>Nivel</th>
                   <th>Pts</th>
                   <th>PJ</th>
@@ -156,7 +159,7 @@ function render() {
         <article class="panel" id="ligas">
           <div class="panel-title">
             <h2>Ligas y bombos</h2>
-            <span>Ranking editable en futura version</span>
+            <span>Ranking base de la temporada inaugural</span>
           </div>
           <div class="pots">
             ${[1, 2, 3, 4]
@@ -205,8 +208,8 @@ function render() {
     </main>
 
     <footer class="statusbar">
-      <span>Simulacion: <strong>${playedMatches === state.matches.length ? "Completa" : "Activa"}</strong></span>
-      <span>Ultima simulacion: ${state.lastSimulationAt ?? "sin ejecutar"}</span>
+      <span>Simulación: <strong>${playedMatches === state.matches.length ? "Completa" : "Activa"}</strong></span>
+      <span>Última simulación: ${state.lastSimulationAt ?? "sin ejecutar"}</span>
       <span>Prototipo no oficial</span>
       <button class="link-button" data-action="reset-all">Reiniciar todo</button>
     </footer>
@@ -220,19 +223,25 @@ function renderLandingHero(group, playedMatches, qualifiedCount) {
   return `
     <section class="landing-hero" id="inicio">
       <div class="hero-copy">
-        <h1>Mundial de Ligas de Futbol</h1>
-        <p class="hero-lead">La copa que enfrenta ligas, no clubes</p>
-        <p class="hero-text">Explora 48 ligas, simula la fase de grupos y abre cada plantilla para ver titulares y suplentes.</p>
+        <span class="hero-eyebrow"><i aria-hidden="true"></i> Temporada inaugural · 48 ligas</span>
+        <h1><span>Mundial de</span><strong>Ligas de Fútbol</strong></h1>
+        <p class="hero-lead">El mundo juega en una sola liga.</p>
+        <p class="hero-text">Construí tu torneo, simulá cada cruce y descubrí qué campeonato tiene todo para coronarse.</p>
         <div class="hero-actions">
-          <a class="button primary hero-cta" href="#grupos">${trophyIcon()} Entrar a fase de grupos</a>
-          <a class="button secondary hero-cta" href="#ligas">${globeIcon()} Ver ligas</a>
+          <a class="button primary hero-cta" href="#grupos">${trophyIcon()} Comenzar torneo</a>
+          <a class="button secondary hero-cta" href="#ligas">${globeIcon()} Explorar las 48 ligas</a>
+        </div>
+        <div class="hero-trust" aria-label="Características de la experiencia">
+          <span><b>12</b> grupos</span>
+          <span><b>72</b> partidos iniciales</span>
+          <span><b>1</b> campeón</span>
         </div>
       </div>
 
       <aside class="hero-preview" aria-label="Vista previa del torneo">
         <div class="hero-preview-header">
           <h2>Fase de grupos</h2>
-          <span>${playedMatches === state.matches.length ? "Completa" : "En curso"}</span>
+          <span class="status-pill"><i aria-hidden="true"></i>${playedMatches === state.matches.length ? "Completa" : "En vivo"}</span>
         </div>
         <div class="hero-preview-grid">
           <div class="mini-standings">
@@ -251,7 +260,7 @@ function renderLandingHero(group, playedMatches, qualifiedCount) {
               .join("")}
           </div>
           <div class="mini-fixtures">
-            <h3>Proximos partidos</h3>
+            <h3>Próximos partidos</h3>
             ${upcomingMatches.map(renderHeroMatch).join("")}
           </div>
         </div>
@@ -290,8 +299,9 @@ function renderJourneyGuide() {
   return `
     <section class="journey-guide" aria-label="Guia del torneo">
       <div class="journey-title">
-        <h2>5 pasos para vivir la experiencia</h2>
-        <p>La app te acompaña desde la fase de grupos hasta la lectura de cada plantilla.</p>
+        <span class="journey-kicker">Tu camino al título</span>
+        <h2>Todo el torneo, bajo tu control</h2>
+        <p>De la primera fecha a la gran final, cada decisión se actualiza en tiempo real.</p>
       </div>
       <div class="journey-steps">
         ${steps
@@ -324,8 +334,8 @@ function journeyStepTarget(number) {
 function renderPublicNotice() {
   return `
     <section class="public-notice" aria-label="Aviso de proyecto no oficial">
-      <strong>Prototipo no oficial.</strong>
-      <span>No afiliado ni aprobado por organizaciones, ligas, clubes o jugadores. Logos, nombres y marcas pertenecen a sus titulares; resultados y plantillas son datos de simulacion.</span>
+      <strong>Experiencia conceptual no oficial.</strong>
+      <span>No afiliada ni aprobada por organizaciones, ligas, clubes o jugadores. Logos, nombres y marcas pertenecen a sus titulares; resultados y plantillas son datos de simulación.</span>
     </section>
   `;
 }
@@ -380,7 +390,7 @@ function renderQualifiedTeam(team) {
 
 function renderBracketSection(bracket, qualified, playedMatches, knockoutRounds) {
   const isComplete = playedMatches === state.matches.length;
-  const projectedLabel = isComplete ? "Cuadro definido" : "Proyeccion en vivo";
+  const projectedLabel = isComplete ? "Cuadro definido" : "Proyección en vivo";
   const bracketSlots = bracket.flatMap((match) => [match.home, match.away]).filter(Boolean).length;
   const playedKnockoutMatches = knockoutRounds.flat().filter(isKnockoutMatchPlayed).length;
   const champion = knockoutRounds.at(-1)?.[0]?.winner;
@@ -390,12 +400,12 @@ function renderBracketSection(bracket, qualified, playedMatches, knockoutRounds)
     <article class="panel bracket-section" id="bracket">
       <div class="panel-title bracket-section-title">
         <div>
-          <h2>Llaves de eliminacion directa</h2>
-          <span>${projectedLabel}: ronda de 32 con cruces por ranking de clasificacion</span>
+          <h2>Llaves de eliminación directa</h2>
+          <span>${projectedLabel}: ronda de 32 con cruces por ranking de clasificación</span>
         </div>
         <div class="bracket-status">
           <strong>${champion ? champion.league.name : `${playedKnockoutMatches}/31`}</strong>
-          <span>${champion ? "campeon simulado" : "partidos definidos"}</span>
+          <span>${champion ? "campeón simulado" : "partidos definidos"}</span>
         </div>
       </div>
 
@@ -420,9 +430,9 @@ function renderBracketSection(bracket, qualified, playedMatches, knockoutRounds)
         <div class="bracket-orbit orbit-qf" aria-hidden="true"></div>
         <div class="bracket-orbit orbit-sf" aria-hidden="true"></div>
         <div class="bracket-core">
-          <span>Camino al titulo</span>
+          <span>Camino al título</span>
           <strong>Final</strong>
-          <em>Campeon de ligas</em>
+          <em>Campeón de ligas</em>
         </div>
         ${renderBracketPathLinks(bracket.length)}
         ${knockoutRounds[0].map((match, index) => renderCircularBracketMatch(match, index, bracket.length)).join("")}
