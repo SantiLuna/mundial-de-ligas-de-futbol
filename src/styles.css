@@ -1596,8 +1596,13 @@ tbody tr.third {
   inset: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 520px);
+  grid-template-columns: minmax(0, 1fr) minmax(560px, 720px);
   background: rgba(5, 22, 12, 0.3);
+}
+
+html:has(.squad-overlay),
+body:has(.squad-overlay) {
+  overflow: hidden;
 }
 
 .squad-backdrop {
@@ -1612,6 +1617,7 @@ tbody tr.third {
   gap: 16px;
   height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 22px;
   border-left: 1px solid var(--line);
   background: var(--surface);
@@ -3161,7 +3167,9 @@ tbody tr.third {
 }
 
 .squad-panel {
-  width: min(720px, 100vw);
+  width: 100%;
+  max-width: 720px;
+  min-width: 0;
   border-left-color: rgba(185, 242, 39, 0.15);
   background: #f4f6f1;
   box-shadow: -30px 0 90px rgba(0, 0, 0, 0.32);
@@ -4414,6 +4422,52 @@ tbody tr.third {
 
   .squad-panel {
     height: 100dvh;
+  }
+}
+
+.bracket-viewport {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.bracket-scroll-hint {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  .bracket-scroll-hint {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 12px 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #e9eee8;
+    color: #4f675a;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .bracket-scroll-hint span {
+    color: #17683f;
+    font-size: 17px;
+  }
+
+  .bracket-viewport {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding-bottom: 8px;
+    scrollbar-color: #8ca697 #e4eae3;
+    scrollbar-width: thin;
+  }
+
+  .bracket-viewport .circular-bracket {
+    flex: 0 0 620px;
+    width: 620px;
+    margin: 0 12px 6px;
   }
 }
 

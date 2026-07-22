@@ -73,7 +73,7 @@ function render() {
 
     <main class="layout">
       <aside class="sidebar">
-        <section class="quick-stats" aria-label="Resumen rapido">
+        <section class="quick-stats" aria-label="Resumen rápido">
           <div><strong>${leagues.length}</strong><span>ligas</span></div>
           <div><strong>${groups.length}</strong><span>grupos</span></div>
           <div><strong>${playedMatches}</strong><span>jugados</span></div>
@@ -545,19 +545,22 @@ function renderBracketSection(bracket, qualified, playedMatches, knockoutRounds)
         </div>
       </div>
 
-      <div class="circular-bracket" aria-label="Camino circular de llaves">
-        <div class="bracket-orbit orbit-r32" aria-hidden="true"></div>
-        <div class="bracket-orbit orbit-r16" aria-hidden="true"></div>
-        <div class="bracket-orbit orbit-qf" aria-hidden="true"></div>
-        <div class="bracket-orbit orbit-sf" aria-hidden="true"></div>
-        <div class="bracket-core">
-          <span>Camino al título</span>
-          <strong>Final</strong>
-          <em>Campeón de ligas</em>
+      <p class="bracket-scroll-hint">Deslizá para explorar el cuadro completo <span aria-hidden="true">→</span></p>
+      <div class="bracket-viewport" tabindex="0" aria-label="Cuadro circular desplazable">
+        <div class="circular-bracket" aria-label="Camino circular de llaves">
+          <div class="bracket-orbit orbit-r32" aria-hidden="true"></div>
+          <div class="bracket-orbit orbit-r16" aria-hidden="true"></div>
+          <div class="bracket-orbit orbit-qf" aria-hidden="true"></div>
+          <div class="bracket-orbit orbit-sf" aria-hidden="true"></div>
+          <div class="bracket-core">
+            <span>Camino al título</span>
+            <strong>Final</strong>
+            <em>Campeón de ligas</em>
+          </div>
+          ${renderBracketPathLinks(bracket.length)}
+          ${knockoutRounds[0].map((match, index) => renderCircularBracketMatch(match, index, bracket.length)).join("")}
+          ${renderCircularPathNodes(bracket.length, knockoutRounds)}
         </div>
-        ${renderBracketPathLinks(bracket.length)}
-        ${knockoutRounds[0].map((match, index) => renderCircularBracketMatch(match, index, bracket.length)).join("")}
-        ${renderCircularPathNodes(bracket.length, knockoutRounds)}
       </div>
 
       ${renderKnockoutSimulator(knockoutRounds, bracketSlots)}
@@ -771,7 +774,7 @@ function renderSquadPanel(league, squad) {
           <div>
             <span class="squad-kicker">Plantilla de liga</span>
             <h2>${leagueLogo(league)} ${leagueFlagBadge(league)} ${league.name}</h2>
-            <p>${league.region} · Nivel ${league.level} · Formacion ${squad.formation}</p>
+            <p>${league.region} · Nivel ${league.level} · Formación ${squad.formation}</p>
           </div>
           <button class="icon-button" data-action="close-squad" aria-label="Cerrar">×</button>
         </header>
@@ -785,7 +788,7 @@ function renderSquadPanel(league, squad) {
 
         <p class="squad-note">${squad.sourceNote}</p>
 
-        <section class="lineup-editor" aria-label="Editor de formacion">
+        <section class="lineup-editor" aria-label="Editor de formación">
           <div class="lineup-controls">
             <label>
               <span>Esquema</span>
@@ -795,10 +798,10 @@ function renderSquadPanel(league, squad) {
             </label>
             <button class="button secondary" data-action="reset-lineup" data-league-id="${league.id}" ${squad.hasCustomLineup ? "" : "disabled"}>Restaurar</button>
           </div>
-          <p>${selectedPlayer ? `Seleccionado: ${selectedPlayer.name}. Elegi otro jugador para intercambiar.` : "Arrastra un jugador sobre otro o selecciona dos para intercambiar titular, suplente o posicion."}</p>
+          <p>${selectedPlayer ? `Seleccionado: ${selectedPlayer.name}. Elegí otro jugador para intercambiar.` : "Arrastrá un jugador sobre otro o seleccioná dos para intercambiar titular, suplente o posición."}</p>
         </section>
 
-        <section class="formation-board" aria-label="Formacion titular ${squad.formation}">
+        <section class="formation-board" aria-label="Formación titular ${squad.formation}">
           ${renderFormationBoard(league, squad)}
         </section>
 
@@ -1021,7 +1024,7 @@ async function loadLogoManifest() {
 }
 
 function footballIcon() {
-  return `<svg viewBox="0 0 24 24" role="img" aria-label="Balon"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="m12 7 4 3-1.5 5h-5L8 10l4-3Z" fill="currentColor"/><path d="M4.8 10.2 8 10m8 0 3.2.2M9.5 15 7.7 19m6.8-4 1.8 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+  return `<svg viewBox="0 0 24 24" role="img" aria-label="Balón"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="m12 7 4 3-1.5 5h-5L8 10l4-3Z" fill="currentColor"/><path d="M4.8 10.2 8 10m8 0 3.2.2M9.5 15 7.7 19m6.8-4 1.8 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 }
 
 function trophyIcon() {
