@@ -18,6 +18,7 @@ export const tournamentConfig = {
   ],
   eligibilityRules: {
     cutoffDaysBeforeTournament: 90,
+    contractMustRemainValidThroughYearEnd: true,
     maxPlayersPerClub: 4,
     minimumDistinctClubs: 8,
     loanedPlayersRepresentCurrentLeague: true,

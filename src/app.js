@@ -56,7 +56,7 @@ function render() {
         </span>
       </a>
       <nav class="tabs" aria-label="Secciones">
-        <a href="#inicio">Inicio</a>
+        <a href="#concepto">El concepto</a>
         <a href="#grupos">Fase de grupos</a>
         <a href="#simulacion">Simulación</a>
         <a href="#clasificados">Clasificados</a>
@@ -67,6 +67,7 @@ function render() {
     </header>
 
     ${renderLandingHero(landingGroup, playedMatches, qualified.all.length)}
+    ${renderConceptExplainer()}
     ${renderJourneyGuide()}
     ${renderPublicNotice()}
 
@@ -225,11 +226,11 @@ function renderLandingHero(group, playedMatches, qualifiedCount) {
       <div class="hero-copy">
         <span class="hero-eyebrow"><i aria-hidden="true"></i> Temporada inaugural · 48 ligas</span>
         <h1><span>Mundial de</span><strong>Ligas de Fútbol</strong></h1>
-        <p class="hero-lead">El mundo juega en una sola liga.</p>
-        <p class="hero-text">Construí tu torneo, simulá cada cruce y descubrí qué campeonato tiene todo para coronarse.</p>
+        <p class="hero-lead">No juegan países. Juegan campeonatos.</p>
+        <p class="hero-text">Cada liga convoca a sus mejores futbolistas, sin importar su nacionalidad. Rivales de club se vuelven compañeros para defender el lugar donde compiten.</p>
         <div class="hero-actions">
-          <a class="button primary hero-cta" href="#grupos">${trophyIcon()} Comenzar torneo</a>
-          <a class="button secondary hero-cta" href="#ligas">${globeIcon()} Explorar las 48 ligas</a>
+          <a class="button primary hero-cta" href="#concepto">${globeIcon()} Entender el Mundial</a>
+          <a class="button secondary hero-cta" href="#grupos">${trophyIcon()} Ir al simulador</a>
         </div>
         <div class="hero-trust" aria-label="Características de la experiencia">
           <span><b>12</b> grupos</span>
@@ -275,6 +276,153 @@ function renderLandingHero(group, playedMatches, qualifiedCount) {
   `;
 }
 
+function renderConceptExplainer() {
+  const premierLeague = leagues.find((league) => league.id === "premier-league");
+  const argentinaLeague = leagues.find((league) => league.id === "liga-profesional-argentina");
+  const rules = tournamentConfig.eligibilityRules;
+
+  return `
+    <section class="concept-explainer" id="concepto" aria-labelledby="concept-title">
+      <div class="concept-shell">
+        <header class="concept-heading">
+          <div>
+            <span class="concept-kicker">Primero, la idea</span>
+            <h2 id="concept-title">Una liga se convierte<br />en selección.</h2>
+          </div>
+          <p><strong>Una liga</strong> es el campeonato que reúne a los clubes de un país o región. En este Mundial, esos clubes aportan futbolistas para formar un único plantel que representa al torneo donde juegan.</p>
+        </header>
+
+        <div class="concept-definition-grid">
+          <article class="concept-rule-card">
+            <span class="concept-card-number">01 · La regla central</span>
+            <h3>El pasaporte no define el equipo. El contrato sí.</h3>
+            <p>Puede ser convocado cualquier jugador que compita en un club de esa liga al cierre de la lista y mantenga contrato vigente hasta el final del año del Mundial.</p>
+
+            <div class="contract-rule">
+              <span class="contract-date"><strong>31</strong><small>DIC</small></span>
+              <div>
+                <strong>Vínculo vigente</strong>
+                <span>hasta el cierre del año de la edición</span>
+              </div>
+            </div>
+
+            <ul class="eligibility-list">
+              <li><span>✓</span><div><strong>Nacionalidad libre</strong><small>El país de nacimiento no limita la convocatoria.</small></div></li>
+              <li><span>✓</span><div><strong>Equilibrio entre clubes</strong><small>Máximo ${rules.maxPlayersPerClub} jugadores por club y al menos ${rules.minimumDistinctClubs} clubes representados.</small></div></li>
+              <li><span>✓</span><div><strong>Préstamos incluidos</strong><small>El jugador representa a la liga en la que compite durante la edición.</small></div></li>
+            </ul>
+
+            <p class="registration-note">La nómina se cierra ${rules.cutoffDaysBeforeTournament} días antes del torneo para validar contratos, préstamos y elegibilidad.</p>
+          </article>
+
+          <div class="league-examples" aria-label="Ejemplos de selecciones de liga">
+            ${renderLeagueConceptExample(
+              premierLeague,
+              ["Arsenal", "Liverpool", "Manchester City"],
+              ["🏴 Inglaterra", "🇦🇷 Argentina", "🇪🇬 Egipto"],
+              "Ingleses y extranjeros que compiten en clubes de la Premier pueden compartir el mismo vestuario."
+            )}
+            ${renderLeagueConceptExample(
+              argentinaLeague,
+              ["River Plate", "Boca Juniors", "Racing Club"],
+              ["🇦🇷 Argentina", "🇨🇴 Colombia", "🇺🇾 Uruguay"],
+              "Argentinos y futbolistas de otras nacionalidades representan juntos al campeonato argentino."
+            )}
+          </div>
+        </div>
+
+        <article class="rivals-story">
+          <div class="rivals-copy">
+            <span class="concept-card-number">02 · La transformación</span>
+            <h3>Rivales el domingo.<br />Compañeros en el Mundial.</h3>
+            <p>La lógica se parece a una Copa del Mundo: futbolistas que se enfrentan durante toda la temporada dejan atrás la camiseta de su club y construyen una identidad común. La diferencia es que acá no los une el pasaporte; los une la liga.</p>
+          </div>
+          <div class="rivals-diagram" aria-label="De rivales de clubes a compañeros de liga">
+            <div class="rival-side">
+              <small>Durante la temporada</small>
+              <span>Club A</span>
+              <b>VS</b>
+              <span>Club B</span>
+              <strong>Rivales</strong>
+            </div>
+            <span class="diagram-arrow" aria-hidden="true">→</span>
+            <div class="league-side">
+              <span class="league-side-mark">${footballIcon()}</span>
+              <div><small>En el Mundial</small><strong>Un mismo equipo</strong></div>
+              <em>Compañeros</em>
+            </div>
+          </div>
+        </article>
+
+        <div class="concept-value-section">
+          <div class="concept-value-heading">
+            <span class="concept-card-number">03 · Lo que está en juego</span>
+            <h3>¿Por qué una liga querría competir?</h3>
+            <p>No es solamente ganar una copa. El torneo crea una razón para invertir, medir el nivel real y mostrar el campeonato ante una audiencia global.</p>
+          </div>
+
+          <div class="value-cards">
+            <article>
+              <span>${globeIcon()}</span>
+              <strong>Visibilidad global</strong>
+              <p>Jugadores, clubes y ligas emergentes acceden a una vidriera que cruza mercados y continentes.</p>
+            </article>
+            <article>
+              <span>${podiumIcon()}</span>
+              <strong>Comparación real</strong>
+              <p>Europa, Sudamérica, África, Asia, Norteamérica y Oceanía se miden con el mismo formato.</p>
+            </article>
+            <article>
+              <span>${shirtIcon()}</span>
+              <strong>Premio para los clubes</strong>
+              <p>El modelo propone incentivos según jugadores aportados, minutos disputados y avance de la liga.</p>
+            </article>
+            <article class="value-card-highlight">
+              <span>${trophyIcon()}</span>
+              <strong>Elevar el campeonato</strong>
+              <p>Contratar y desarrollar talento elegible fortalece indirectamente el nivel, la profundidad y el atractivo de toda la liga.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="global-comparison">
+          <div>
+            <span class="comparison-kicker">Un ranking, múltiples identidades</span>
+            <strong>¿Qué liga es realmente la más fuerte?</strong>
+          </div>
+          <p>El simulador compara nivel medio, profundidad del plantel, actualidad y diversidad de clubes. No parte de que un continente sea superior: lo pone a prueba en la cancha.</p>
+          <div class="continent-track" aria-label="Regiones comparadas">
+            <span>Europa</span><i>↔</i><span>Sudamérica</span><i>↔</i><span>África</span><i>↔</i><span>Asia</span><i>↔</i><span>Norteamérica</span><i>↔</i><span>Oceanía</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderLeagueConceptExample(league, clubs, nationalities, description) {
+  return `
+    <article class="league-example-card">
+      <header>
+        ${leagueLogo(league)}
+        <div><span>Ejemplo de convocatoria</span><h3>${league.name}</h3></div>
+        ${leagueFlagBadge(league)}
+      </header>
+      <div class="club-merge">
+        <div class="club-list">
+          ${clubs.map((club) => `<span>${club}</span>`).join("")}
+        </div>
+        <span class="merge-arrow" aria-hidden="true">→</span>
+        <strong>${leagueLogo(league)}<small>Selección de liga</small></strong>
+      </div>
+      <div class="nationality-row">
+        ${nationalities.map((nationality) => `<span>${nationality}</span>`).join("")}
+      </div>
+      <p>${description}</p>
+    </article>
+  `;
+}
+
 function renderHeroMatch(match) {
   const home = leagues.find((league) => league.id === match.homeLeagueId);
   const away = leagues.find((league) => league.id === match.awayLeagueId);
@@ -289,19 +437,19 @@ function renderHeroMatch(match) {
 
 function renderJourneyGuide() {
   const steps = [
-    ["1", "Revisar grupos", "Explora los grupos y conoce a las 48 ligas participantes.", groupIcon()],
-    ["2", "Simular partidos", "Ejecuta resultados por grupo o simula el torneo completo.", playIcon()],
-    ["3", "Ver clasificados", "Sigue directos y mejores terceros antes del cuadro final.", podiumIcon()],
-    ["4", "Explorar llaves", "Consulta los cruces proyectados de la ronda de 32.", trophyIcon()],
-    ["5", "Abrir plantillas", "Entra a cada liga para ver formacion titular y suplentes.", shirtIcon()]
+    ["1", "Entender la idea", "Conocé quién representa a cada liga y cómo se forman los planteles.", globeIcon()],
+    ["2", "Revisar grupos", "Explorá los grupos y conocé a las 48 ligas participantes.", groupIcon()],
+    ["3", "Simular partidos", "Ejecutá resultados por grupo o simulá el torneo completo.", playIcon()],
+    ["4", "Explorar llaves", "Consultá los cruces proyectados de la ronda de 32.", trophyIcon()],
+    ["5", "Abrir plantillas", "Entrá a cada liga para ver formación titular y suplentes.", shirtIcon()]
   ];
 
   return `
-    <section class="journey-guide" aria-label="Guia del torneo">
+    <section class="journey-guide" aria-label="Guía del torneo">
       <div class="journey-title">
-        <span class="journey-kicker">Tu camino al título</span>
+        <span class="journey-kicker">Ahora sí, a jugar</span>
         <h2>Todo el torneo, bajo tu control</h2>
-        <p>De la primera fecha a la gran final, cada decisión se actualiza en tiempo real.</p>
+        <p>Ya conocés la idea. Ahora llevá una edición desde la primera fecha hasta la gran final.</p>
       </div>
       <div class="journey-steps">
         ${steps
@@ -322,9 +470,9 @@ function renderJourneyGuide() {
 
 function journeyStepTarget(number) {
   const targets = {
-    1: "#grupos",
-    2: "#simulacion",
-    3: "#clasificados",
+    1: "#concepto",
+    2: "#grupos",
+    3: "#simulacion",
     4: "#bracket",
     5: "#ligas"
   };
